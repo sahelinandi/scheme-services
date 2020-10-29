@@ -17,11 +17,11 @@ export default ({ config, db }) => {
     "/userAuth",
     asyncHandler(async (request, res, next) => {       
       //console.log(request.body.RequestInfo);
-
+      let successStatus = false;
       let userName = request.body.userName;
       let password = request.body.password;
      
-     let text ="SELECT user_name, password FROM tbl_user where active_flag = true and user_name ='" + userName+"'";
+     let text ="SELECT user_name, password FROM tbl_user where active = true and user_name ='" + userName+"'";
       
     
       let sqlQuery = text;      
@@ -30,6 +30,11 @@ export default ({ config, db }) => {
       db.query(sqlQuery, async (err, dbRes) => {
         if (err) {
           console.log(err.stack);
+          let response = {
+            SuccessStatus:successStatus,
+            ErrorMessage: err.stack
+          };  
+          res.json(response);          
         } else {        
           users =
               dbRes.rows && !isEmpty(dbRes.rows)
@@ -40,6 +45,7 @@ export default ({ config, db }) => {
                   )
                 : [];  
           
+                successStatus = true;
           let authenticate = false;
           let userName = "";
           
@@ -50,7 +56,8 @@ export default ({ config, db }) => {
 
           let response = {
             AuthenticationStatus:authenticate,
-            UserName:userName
+            UserName:userName,
+            SuccessStatus:successStatus
           };                                
           res.json(response);          
         }  
